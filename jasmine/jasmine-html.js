@@ -228,11 +228,24 @@ jasmineRequire.HtmlReporter = function(j$) {
 
       summaryList(topResults, summary);
 
+      function isActive(resultsNode) {
+        if (resultsNode.type == 'suite') {
+          for (var i = 0; i < resultsNode.children.length; i ++) {
+            if (isActive(resultsNode.children[i])) {
+              return true;
+            }
+          }
+          return false;
+        } else if (resultsNode.type == 'spec') {
+          return resultsNode.result.status != 'disabled';
+        }
+      }
+
       function summaryList(resultsTree, domParent) {
         var specListNode;
         for (var i = 0; i < resultsTree.children.length; i++) {
           var resultNode = resultsTree.children[i];
-          if (resultNode.type == 'suite') {
+          if (resultNode.type == 'suite' && isActive(resultNode)) {
             var suiteListNode = createDom('ul', {className: 'suite', id: 'suite-' + resultNode.result.id},
               createDom('li', {className: 'suite-detail'},
                 createDom('a', {href: specHref(resultNode.result)}, resultNode.result.description)
@@ -242,7 +255,7 @@ jasmineRequire.HtmlReporter = function(j$) {
             summaryList(resultNode, suiteListNode);
             domParent.appendChild(suiteListNode);
           }
-          if (resultNode.type == 'spec') {
+          if (resultNode.type == 'spec' && resultNode.result.status != 'disabled') {
             if (domParent.getAttribute('class') != 'specs') {
               specListNode = createDom('ul', {className: 'specs'});
               domParent.appendChild(specListNode);

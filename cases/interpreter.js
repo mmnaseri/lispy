@@ -98,10 +98,15 @@ describe("the interpreter", function () {
 
     it("should allow for adding additional values into the local environment via the `addon` argument", function () {
         var random = Math.random();
-        var value = Lispy.interpret(['quote', 'x'], {
+        var spy = jasmine.createSpy();
+        var fn = 'myFunction';
+        Lispy.handle(fn, spy);
+        expect(spy).not.toHaveBeenCalled();
+        Lispy.interpret([fn, 'x'], {
             x: random
         });
-        expect(value).toEqual([random]);
+        expect(spy.calls.count()).toBe(1);
+        expect(spy).toHaveBeenCalledWith(random);
     });
 
     it("should map the first token to a function name in the environment if it is a string", function () {

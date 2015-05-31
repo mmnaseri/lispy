@@ -424,24 +424,42 @@ describe("In the core of the language", function () {
 
     describe("`label`", function () {
 
-        it("should return a function that resolves the value", function () {
+        it("should return the value, as it was defined", function () {
             var value = Math.random();
             var interpretation = Lispy.interpret(['label', 'x', value]);
             expect(interpretation).toBeDefined();
             expect(interpretation).not.toBeNull();
-            expect(interpretation instanceof Function).toBeTruthy();
-            expect(interpretation()).toBe(value);
+            expect(interpretation).toBe(value);
         });
 
         it("should allow for execution of lambda's within its scope when being interpreted", function () {
             var interpretation = Lispy.interpret(['label', 'x',
                 ['lambda', ['y'], ['cond',
                     [['null?', 'y'], 0],
-                    ['T', ['+', 1, [['x'], ['cdr', 'y']]]]
+                    ['T', ['+', 1, ['x', ['cdr', 'y']]]]
                 ]]
             ]);
             window.int = interpretation;
-            expect(true).toBeTruthy();
+            expect(interpretation).toBeDefined();
+            expect(interpretation).not.toBeNull();
+            expect(interpretation instanceof Function).toBe(true);
+            expect(interpretation()).toBe(0);
+            expect(interpretation([])).toBe(0);
+            expect(interpretation([1])).toBe(1);
+            expect(interpretation([1, 2, 3])).toBe(3);
+        });
+
+        it("should allow for immediate execution of defined lambda functions", function () {
+            var interpretation = Lispy.interpret([
+                ['label', 'x',
+                    ['lambda', ['y'], ['cond',
+                        [['null?', 'y'], 0],
+                        ['T', ['+', 1, ['x', ['cdr', 'y']]]]
+                    ]]
+                ],
+                [1, 2, 3]
+            ]);
+            expect(interpretation).toBe(3);
         });
 
     });

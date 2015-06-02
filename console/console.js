@@ -16,7 +16,7 @@
                     output.addClass(type);
                     output.text(value);
                     value = output.text();
-                    value = value.replace(/(\S+:\/\/\S+)/, "<a href='$1'>$1</a>");
+                    value = value.replace(/(\S+:\/\/\S+)/, "<a href='$1' target='_blank'>$1</a>");
                     output.html(value);
                     Console.console.append(output);
                 });

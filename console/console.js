@@ -117,6 +117,7 @@
                                 Console.print(value);
                             });
                         } catch (e) {
+                            console.error(e);
                             Console.error(typeof e.message != "undefined" ? e.message : e);
                         }
                         Console.console.find('.input.active').removeClass('active').addClass('recent');

@@ -96,6 +96,10 @@ body {
     color: #c4e9ff;
 }
 
+#console div.output a {
+    color: #c4e9ff;
+}
+
 #console div.output:before, #console div.error:before {
     content: '> ';
 }

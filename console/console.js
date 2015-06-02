@@ -51,7 +51,10 @@
                 $.each(what, function (index, value) {
                     var output = $("<div></div>");
                     output.addClass(type);
-                    output.append(value);
+                    output.text(value);
+                    value = output.text();
+                    value = value.replace(/(\S+:\/\/\S+)/, "<a href='$1'>$1</a>");
+                    output.html(value);
                     Console.console.append(output);
                 });
             },
@@ -274,7 +277,6 @@
         };
         setTimeout(function () {
             Console.init();
-            Console.sequence("(define x (lambda (a b) (+ a b)))\n");
             var $paste = $("#paste");
             $paste.find('.cancel').on('click', function () {
                 $paste.hide();

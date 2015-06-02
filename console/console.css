@@ -12,9 +12,9 @@ body {
     bottom: 0;
     background: black;
     color: #f4f4f4;
-    padding: 10px;
     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
     overflow: auto;
+    padding: 10px 10px 100px;
 }
 
 #paste {
@@ -131,4 +131,48 @@ body {
 #console .placeholder {
     display: inline-block;
     width: 0;
+}
+
+/** auto-complete **/
+
+.box {
+    display: block;
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #808080;
+    opacity: 0.9;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-size: 12px;
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.box > div {
+    display: table-row;
+    cursor: pointer;
+}
+
+.box > div:hover, .box > div.active {
+    background: #fff9c4;
+}
+
+.box > div > span {
+    display: table-cell;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.box .title {
+    padding-right: 20px;
+    padding-left: 5px;
+}
+
+.box .type {
+    min-width: 40px;
+    color: #999999;
+}
+
+.box .prefix {
+    background: #ffffc4;
+    border-radius: 3px;
 }

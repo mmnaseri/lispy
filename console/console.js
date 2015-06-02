@@ -548,11 +548,11 @@
             setInterval(CaretFading.animate, 1000);
         })();
         //noinspection JSUnusedGlobalSymbols
-        Lispy.load({
+        var lib = {
             managers: {
                 publish: function () {
                     var array = [];
-                    for (var i = 0; i < arguments.length; i ++) {
+                    for (var i = 0; i < arguments.length; i++) {
                         array.push(arguments[i]);
                     }
                     return array;
@@ -618,7 +618,7 @@
                         if ($.isFunction(env[name])) {
                             if (env[name].$$definition) {
                                 var definition = ['lambda'];
-                                for (var i = 0; i < env[name].$$definition.length; i ++) {
+                                for (var i = 0; i < env[name].$$definition.length; i++) {
                                     definition.push(env[name].$$definition[i]);
                                 }
                                 result[name] = definition;
@@ -638,6 +638,13 @@
                     return src.join("\n");
                 }
             }
-        });
+        };
+        lib.environment.clear.$$definition = [[]];
+        lib.environment.error.$$definition = [['msg']];
+        lib.environment.help.$$definition = [[]];
+        lib.environment.ls.$$definition = [[]];
+        lib.environment.print.$$definition = [['msg']];
+        lib.environment.publish.$$definition = [['var1', 'var2', 'var3', '*']];
+        Lispy.load(lib);
     });
 })(jQuery);

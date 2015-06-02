@@ -321,6 +321,35 @@
                 e.stopPropagation();
             });
         }, 100);
+        (function () {
+            var CaretFading = {
+                find: function () {
+                    var current = Console.console.find('.faded');
+                    if (!current || !current.length) {
+                        current = Console.console.find('.input.active').find('.character.active');
+                    }
+                    if (!current || !current.length) {
+                        current = Console.console.find('.input.active').find('.caret');
+                    }
+                    if (!current || !current.length) {
+                        return null;
+                    } else {
+                        return current;
+                    }
+                },
+                animate: function () {
+                    var current = CaretFading.find();
+                    if (current) {
+                        if (current.hasClass('faded')) {
+                            current.removeClass('faded');
+                        } else {
+                            current.addClass('faded');
+                        }
+                    }
+                }
+            };
+            setInterval(CaretFading.animate, 1000);
+        })();
         Lispy.load({
             managers: {
                 publish: function () {

@@ -86,6 +86,30 @@ body {
 #console div.input.active .character.active {
     background: #ffffff;
     color: #222222;
+    -webkit-transition: opacity 0.4s;
+    -moz-transition: opacity 0.4s;
+    -ms-transition: opacity 0.4s;
+    -o-transition: opacity 0.4s;
+    transition: opacity 0.4s;
+}
+
+#console .caret {
+    display: inline-block;
+    background: #ffffff;
+    -webkit-transition: opacity 0.4s;
+    -moz-transition: opacity 0.4s;
+    -ms-transition: opacity 0.4s;
+    -o-transition: opacity 0.4s;
+    transition: opacity 0.4s;
+}
+
+#console .faded {
+    opacity: 0.3;
+    -webkit-transition: opacity 0.4s;
+    -moz-transition: opacity 0.4s;
+    -ms-transition: opacity 0.4s;
+    -o-transition: opacity 0.4s;
+    transition: opacity 0.4s;
 }
 
 #console div.error {
@@ -102,11 +126,6 @@ body {
 
 #console div.output:before, #console div.error:before {
     content: '> ';
-}
-
-#console .caret {
-    display: inline-block;
-    background: #ffffff;
 }
 
 #console .placeholder {

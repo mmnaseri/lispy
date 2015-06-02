@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>LISP Console</title>
+    <link rel="stylesheet" href="console.css"/>
+    <script src="../lib/lispy.js"></script>
+    <script src="jquery-2.1.4.min.js"></script>
+    <script src="console.js"></script>
+</head>
+<body>
+<div id="console"></div>
+<div id="paste">
+    <textarea></textarea>
+    <input type="button" class="submit" value="Paste" />
+    <input type="button" class="cancel" value="Cancel" />
+</div>
+<script type="text/lisp">
+    (print "Welcome to Lispy!")
+    (print "To learn more, type (help)")
+</script>
+</body>
+</html>

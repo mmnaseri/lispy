@@ -4,50 +4,13 @@
  */
 (function ($) {
     $(function () {
-        var Utils = {
-            toString: function (what, surroundString) {
-                var src = "";
-                var i;
-                if (what === null) {
-                    return "(null)";
-                } else if (typeof what == "boolean") {
-                    return what ? "(true)" : "(false)";
-                } else if (typeof what == "function" || what instanceof Function) {
-                    if (what.$$definition) {
-                        return "(lambda:" + Utils.toString(what.$$definition[0], surroundString) + ")";
-                    }
-                    return "(lambda)";
-                } else if (typeof what == "string") {
-                    if (surroundString === true) {
-                        return '"' + what + '"';
-                    }
-                    return what;
-                } else if (typeof what == "number") {
-                    return "" + what;
-                } else if (Array.isArray(what)) {
-                    src += "[";
-                    for (i = 0; i < what.length; i++) {
-                        if (i > 0) {
-                            src += ", ";
-                        }
-                        src += Utils.toString(what[i], surroundString);
-                    }
-                    src += "]";
-                    return src;
-                } else if (typeof what == "object") {
-                    return JSON.stringify(what);
-                } else {
-                    return "(unknown)";
-                }
-            }
-        };
         var Console = {
             console: $("#console"),
             caret: null,
             history: [],
             pointer: 0,
             log: function (type, what) {
-                what = Utils.toString(what).split("\n");
+                what = Lispy.utils().toString(what).split("\n");
                 $.each(what, function (index, value) {
                     var output = $("<div></div>");
                     output.addClass(type);
@@ -74,6 +37,7 @@
                 }
             },
             touch: function () {
+                Console.move();
                 Console.pointer = Console.history.length;
                 Console.console.animate({
                     scrollTop: Console.console.find('div').last().offset().top * 2000
@@ -88,6 +52,11 @@
                     output.text(char);
                 }
                 Console.caret.before(output);
+            },
+            move: function () {
+                if (Console.caret && Console.caret.length) {
+                    Console.caret.removeClass('faded');
+                }
             },
             sequence: function (text) {
                 $.each(text.split(""), function () {
@@ -273,6 +242,16 @@
                     Console.sequence(Console.history[pointer]);
                 }
                 Console.pointer = pointer;
+            },
+            beginning: function () {
+                while (Console.caret && Console.caret.length && Console.caret.prev('.character').length) {
+                    Console.left();
+                }
+            },
+            end: function () {
+                while (Console.caret && Console.caret.length && Console.caret.next('.character').length) {
+                    Console.right();
+                }
             }
         };
         setTimeout(function () {
@@ -286,7 +265,7 @@
                 $paste.hide();
             });
             $(document).on('keydown', function (e) {
-                if ([8, 9, 13, 37, 38, 39, 40].indexOf(e.keyCode) != -1) {
+                if ([8, 9, 13, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) != -1) {
                     e.preventDefault();
                 }
                 if (e.keyCode == 13) {
@@ -294,7 +273,7 @@
                 } else if (e.keyCode == 8) {
                     Console.del();
                 } else if (e.keyCode == 9) {
-                    Console.sequence("   ")
+                    Console.sequence("   ");
                 } else if (e.keyCode == 38) {
                     Console.up();
                 } else if (e.keyCode == 40) {
@@ -303,6 +282,10 @@
                     Console.left();
                 } else if (e.keyCode == 39) {
                     Console.right();
+                } else if (e.keyCode == 35) {
+                    Console.end();
+                } else if (e.keyCode == 36) {
+                    Console.beginning();
                 }
                 if ((e.metaKey || e.ctrlKey) && e.keyCode == 86) {
                     $paste.show();
@@ -402,6 +385,9 @@
                     $.each(func, function (index, item) {
                         env.print("    " + item);
                     });
+                    env.print("");
+                    env.print("You can also use (libs) and (libs-load `name`) to list what");
+                    env.print("libraries are available and to load new ones.");
                 },
                 clear: function () {
                     Console.console.html("");
@@ -430,7 +416,7 @@
                         }
                     });
                     $.each(result, function (name, value) {
-                        src.push("Lispy.interpret(['define', '" + name + "', " + Utils.toString(value, true) + "]);");
+                        src.push("Lispy.interpret(['define', '" + name + "', " + Lispy.utils().toString(value, true) + "]);");
                     });
                     if (src.length == 0) {
                         return;

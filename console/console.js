@@ -391,8 +391,7 @@
                     env.print("libraries are available and to load new ones.");
                 },
                 clear: function () {
-                    Console.console.html("");
-                    Console.init();
+                    Console.console.find("div").remove();
                 },
                 publish: function () {
                     var result = {};

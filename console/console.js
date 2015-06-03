@@ -12,8 +12,10 @@
             log: function (type, what) {
                 what = Lispy.utils().toString(what).split("\n");
                 $.each(what, function (index, value) {
-                    value = value.replace(/&/g, '&amp;').replace(/ /g, '&nbsp;').replace(/\n/g, '<br/>\n').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-                    value = value.replace(/(\S+:\/\/\S+)/, "<a href='$1" + "' target='_blank'>$1</a>");
+                    //todo fix this
+                    //value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    //value = value.replace(/ /g, '&nbsp;').replace(/\n/g, '<br/>\n');
+                    value = value.replace(/([^\s;:/\\&]+:\/\/[^\s;]+)/, "<a href='$1" + "' target='_blank'>$1</a>");
                     var output = $("<div></div>");
                     output.addClass(type);
                     output.html(value);

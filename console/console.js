@@ -12,11 +12,10 @@
             log: function (type, what) {
                 what = Lispy.utils().toString(what).split("\n");
                 $.each(what, function (index, value) {
+                    value = value.replace(/&/g, '&amp;').replace(/ /g, '&nbsp;').replace(/\n/g, '<br/>\n').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    value = value.replace(/(\S+:\/\/\S+)/, "<a href='$1" + "' target='_blank'>$1</a>");
                     var output = $("<div></div>");
                     output.addClass(type);
-                    output.text(value);
-                    value = output.text();
-                    value = value.replace(/(\S+:\/\/\S+)/, "<a href='$1" + "' target='_blank'>$1</a>");
                     output.html(value);
                     Console.console.append(output);
                 });
@@ -269,6 +268,7 @@
                 return $('body .box').length !== 0;
             },
             complete: function () {
+                var Utils = Lispy.utils();
                 Console.touch();
                 if (!Console.caret) {
                     return;
@@ -301,6 +301,7 @@
                     }
                     cursor ++;
                 }
+                var originalExpression = expression;
                 expression = expression.substring(marker + 1);
                 var type = "all";
                 var token = null;
@@ -311,7 +312,7 @@
                     type = "func";
                     token = "";
                 } else {
-                    var exp = /(\(|[^)]\s+)\s*(\S+)$/;
+                    var exp = /(\(|[^)]\s+)\s*([^\s\(]+)$/;
                     var groups = exp.exec(expression);
                     if (groups && groups.length > 2) {
                         if (groups[1] == '(') {
@@ -321,22 +322,38 @@
                     }
                 }
                 if (token === null) {
-                    return;
+                    if (/^\s+$/.test(expression)) {
+                        return;
+                    } else {
+                        token = "";
+                    }
                 }
                 var env = Lispy.env();
+                var contextHolder = {
+                    context: env,
+                    prefix: token,
+                    type: type,
+                    caret: Console.caret,
+                    expression: originalExpression
+                };
+                Console.console.trigger('autoComplete', contextHolder);
+                env = Utils.isObject(contextHolder.context) ? contextHolder.context : env;
                 var candidates = [];
-                var Utils = Lispy.utils();
                 Utils.each(env, function (value, name) {
                     if (name.substring(0, token.length) == token) {
                         if (type == 'all' || (type == 'func' && Utils.isFunction(value))) {
                             candidates.push({
                                 name: name.substring(token.length),
-                                type: Utils.isFunction(value) ? 'lambda' : typeof(value),
+                                type: Utils.isObject(value) && Utils.isString(value.$$type) ? value.$$type : (value === null ? 'null' : (Utils.isFunction(value) ? 'lambda' : typeof(value))),
                                 value: value
                             });
                         }
                     }
                 });
+                if (candidates.length == 0) {
+                    Console.touch();
+                    return;
+                }
                 var complete = function (index, smart) {
                     var candidate = candidates[index];
                     Console.sequence(candidate.name, false);
@@ -517,6 +534,7 @@
             $paste.on('keydown', function (e) {
                 e.stopPropagation();
             });
+            $(document).trigger('consoleReady', Console);
         }, 100);
         (function () {
             var CaretFading = {

@@ -41,7 +41,9 @@
                 $('body .box').each(function () {
                     $(this).data('remove')();
                 });
-                Console.move();
+                if (Console.caret && Console.caret.length) {
+                    Console.caret.removeClass('faded');
+                }
                 Console.pointer = Console.history.length;
                 Console.console.animate({
                     scrollTop: Console.console.find('div').last().offset().top * 2000
@@ -50,6 +52,7 @@
             type: function (char, complete) {
                 var completing = complete !== false && Console.completing();
                 Console.touch();
+                Console.move();
                 var output = $("<span class='character'></span>");
                 if (char == ' ') {
                     output.html('&nbsp;');
@@ -57,13 +60,80 @@
                     output.text(char);
                 }
                 Console.caret.before(output);
-                if (complete !== false && (completing || char == '(')) {
+                if (complete !== false && char != ')' && (completing || char == '(')) {
                     Console.complete();
                 }
             },
             move: function () {
-                if (Console.caret && Console.caret.length) {
-                    Console.caret.removeClass('faded');
+                Console.console.find('.pair').removeClass('pair');
+                Console.console.find('.invalid').removeClass('invalid');
+                if (!Console.caret) {
+                    return;
+                }
+                var text = Console.caret.text();
+                if (text != '(' && text != ')') {
+                    return;
+                }
+                var pointer = Console.caret;
+                var count = 1;
+                var quote = false;
+                if (text == '(') {
+                    //searching for matching closer in the right hand side
+                    while (count > 0) {
+                        if (pointer.next().hasClass('character')) {
+                            pointer = pointer.next();
+                        } else if (pointer.parent().next().hasClass('input') && pointer.parent().next().hasClass('active')) {
+                            //we are at the end of current line, retrace to connecting line
+                            pointer = pointer.parent().next().find('.character').first();
+                        } else {
+                            //no more characters to go to
+                            break;
+                        }
+                        if (quote) {
+                            if (pointer.text() == '"') {
+                                quote = false;
+                            }
+                        } else {
+                            if (pointer.text() == '"') {
+                                quote = true;
+                            } else if (pointer.text() == ')') {
+                                count --;
+                            } else if (pointer.text() == '(') {
+                                count ++;
+                            }
+                        }
+                    }
+                } else {
+                    //searching for the matching opener in the left hand side
+                    while (count > 0) {
+                        if (pointer.prev().hasClass('character')) {
+                            pointer = pointer.prev();
+                        } else if (pointer.parent().prev().hasClass('input') && pointer.parent().prev().hasClass('active')) {
+                            //we are at the end of current line, retrace to previous line
+                            pointer = pointer.parent().prev().find('.character').last();
+                        } else {
+                            //no more characters to go to
+                            break;
+                        }
+                        if (quote) {
+                            if (pointer.text() == '"') {
+                                quote = false;
+                            }
+                        } else {
+                            if (pointer.text() == '"') {
+                                quote = true;
+                            } else if (pointer.text() == ')') {
+                                count ++;
+                            } else if (pointer.text() == '(') {
+                                count --;
+                            }
+                        }
+                    }
+                }
+                if (count == 0 && pointer.length != 0) {
+                    pointer.addClass('pair');
+                } else {
+                    Console.caret.addClass('invalid');
                 }
             },
             sequence: function (text, complete) {
@@ -75,6 +145,9 @@
                     }
                 });
             },
+            indent: function () {
+                Console.sequence("   ", false);
+            },
             enter: function () {
                 var current = "";
                 Console.console.find('.input.active').last().find('.character').each(function () {
@@ -82,6 +155,7 @@
                 });
                 Console.history.push(current);
                 Console.touch();
+                Console.move();
                 if (Console.caret.hasClass('caret')) {
                     //the caret is at the end of the line and this is an intelligent return key
                     var statement = [];
@@ -132,6 +206,28 @@
                         Console.console.append("<div class='input active first'><span class='placeholder'>&nbsp;</span></div>");
                     }
                     Console.init();
+                    if (open > 0 || quotes > 0) {
+                        if (Console.caret.parent().prev().hasClass('input') && Console.caret.parent().prev().hasClass('active')) {
+                            if (Console.caret.parent().prev().hasClass('first')) {
+                                Console.indent();
+                            } else {
+                                var indentation = "";
+                                var pointer = Console.caret.parent().prev().find('.character').first();
+                                while (/^\s+$/.test(pointer.text())) {
+                                    pointer = pointer.next('.character');
+                                    indentation += " ";
+                                }
+                                if (indentation.length % 3 == 0) {
+                                    for (var i = 0; i < indentation.length / 3; i ++) {
+                                        Console.indent();
+                                    }
+                                    Console.indent();
+                                } else {
+                                    Console.sequence(indentation);
+                                }
+                            }
+                        }
+                    }
                 } else if (Console.caret.hasClass('character')) {
                     //we are in the middle of the line, so just break the line where the caret is
                     var selection = Console.caret.nextUntil(".caret");
@@ -146,6 +242,7 @@
             del: function () {
                 var completing = Console.completing();
                 Console.touch();
+                Console.move();
                 var caret = Console.caret;
                 var previous = caret.prev('.character');
                 if (previous.length) {
@@ -193,6 +290,7 @@
                         Console.caret.addClass('active');
                     }
                 }
+                Console.move();
             },
             right: function () {
                 Console.touch();
@@ -223,6 +321,7 @@
                     Console.caret = null;
                     Console.init();
                 }
+                Console.move();
             },
             up: function () {
                 if (Console.history.length == 0) {
@@ -236,7 +335,7 @@
                 Console.console.find('.input.active').last().find('.caret').remove();
                 Console.caret = null;
                 Console.init();
-                Console.sequence(Console.history[pointer]);
+                Console.sequence(Console.history[pointer], false);
                 Console.pointer = pointer;
             },
             down: function () {
@@ -252,7 +351,7 @@
                 Console.caret = null;
                 Console.init();
                 if (pointer < Console.history.length) {
-                    Console.sequence(Console.history[pointer]);
+                    Console.sequence(Console.history[pointer], false);
                 }
                 Console.pointer = pointer;
             },
@@ -269,7 +368,7 @@
             completing: function () {
                 return $('body .box').length !== 0;
             },
-            complete: function () {
+            complete: function (autoFinish) {
                 var Utils = Lispy.utils();
                 Console.touch();
                 if (!Console.caret) {
@@ -360,6 +459,7 @@
                     var candidate = candidates[index];
                     Console.sequence(candidate.name, false);
                     if (smart) {
+                        console.log(candidate);
                         if (Utils.isFunction(candidate.value)) {
                             if (candidate.value.$$definition) {
                                 var args = candidate.value.$$definition[0];
@@ -367,20 +467,17 @@
                                     Console.sequence(")");
                                 } else {
                                     Console.sequence(" ");
-                                    Console.complete();
+                                    Console.complete(false);
                                 }
                             }
                         } else {
                             Console.sequence(" ");
-                            Console.complete();
+                            Console.complete(false);
                         }
                     }
                 };
-                if (candidates.length == 1) {
-                    if ((new RegExp("\\b" + (token + candidates[0].name) + "\\s+$")).test(expression)) {
-                        return;
-                    }
-                    complete(0, false);
+                if (candidates.length == 1 && autoFinish !== false) {
+                    complete(0, true);
                     return;
                 }
                 candidates.sort(function (a, b) {
@@ -498,7 +595,7 @@
                     Console.del();
                 } else if (e.keyCode == keys.tab) {
                     if (!Console.completing()) {
-                        Console.sequence("   ");
+                        Console.indent();
                         e.preventDefault();
                     }
                 } else if (e.keyCode == keys.up) {

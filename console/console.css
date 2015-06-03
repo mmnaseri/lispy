@@ -97,6 +97,15 @@ body {
     transition: opacity 0.4s;
 }
 
+#console div.input.active .character.pair {
+    background: #6d6d6d;
+}
+
+#console div.input.active .character.invalid {
+    background: #ffdad6;
+    color: #222222;
+}
+
 #console .caret {
     display: inline-block;
     background: #ffffff;

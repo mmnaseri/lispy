@@ -26,6 +26,10 @@
                     });
                     contextHolder.context = context;
                 }
+            } else if (contextHolder.type == "func") {
+                if (/\(\s*lambda\s+\($/.test(contextHolder.expression)) {
+                    contextHolder.context = {};
+                }
             }
         });
     })

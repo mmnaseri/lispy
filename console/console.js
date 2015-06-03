@@ -208,24 +208,45 @@
                     Console.init();
                     if (open > 0 || quotes > 0) {
                         if (Console.caret.parent().prev().hasClass('input') && Console.caret.parent().prev().hasClass('active')) {
-                            if (Console.caret.parent().prev().hasClass('first')) {
-                                Console.indent();
-                            } else {
-                                var indentation = "";
-                                var pointer = Console.caret.parent().prev().find('.character').first();
-                                while (/^\s+$/.test(pointer.text())) {
-                                    pointer = pointer.next('.character');
-                                    indentation += " ";
-                                }
-                                if (indentation.length % 3 == 0) {
-                                    for (var i = 0; i < indentation.length / 3; i ++) {
-                                        Console.indent();
-                                    }
+                            (function () {
+                                if (Console.caret.parent().prev().hasClass('first')) {
                                     Console.indent();
                                 } else {
-                                    Console.sequence(indentation);
+                                    var indentation = "";
+                                    var pointer = Console.caret.parent().prev().find('.character').first();
+                                    while (/^\s+$/.test(pointer.text())) {
+                                        pointer = pointer.next('.character');
+                                        indentation += " ";
+                                    }
+                                    var open = 0;
+                                    var quote = false;
+                                    while (pointer.length) {
+                                        if (quote) {
+                                            if (pointer.text() == '"') {
+                                                quote = false;
+                                            }
+                                        } else {
+                                            if (pointer.text() == '"') {
+                                                quote = true;
+                                            } else if (pointer.text() == '(') {
+                                                open ++;
+                                            } else if (pointer.text() == ')') {
+                                                open --;
+                                            }
+                                        }
+                                        pointer = pointer.next('.character');
+                                    }
+                                    if (!quote) {
+                                        if (indentation.length % 3 == 0) {
+                                            for (var i = 0; i < indentation.length / 3 + (open <= 0 ? -1 : 1); i ++) {
+                                                Console.indent();
+                                            }
+                                        } else {
+                                            Console.sequence(indentation);
+                                        }
+                                    }
                                 }
-                            }
+                            })();
                         }
                     }
                 } else if (Console.caret.hasClass('character')) {
@@ -240,7 +261,7 @@
                 }
             },
             del: function () {
-                var completing = Console.completing();
+                var completing = Console.completing(true);
                 Console.touch();
                 Console.move();
                 var caret = Console.caret;
@@ -256,7 +277,7 @@
                     });
                     line.next().remove();
                 }
-                if (completing) {
+                if (Lispy.utils().isDefined(completing) && completing != "") {
                     Console.complete();
                 }
             },
@@ -365,8 +386,9 @@
                     Console.right();
                 }
             },
-            completing: function () {
-                return $('body .box').length !== 0;
+            completing: function (returnToken) {
+                var $box = $('body .box');
+                return returnToken ? $box.attr('data-token') : $box.length != 0;
             },
             complete: function (autoFinish) {
                 var Utils = Lispy.utils();
@@ -459,7 +481,6 @@
                     var candidate = candidates[index];
                     Console.sequence(candidate.name, false);
                     if (smart) {
-                        console.log(candidate);
                         if (Utils.isFunction(candidate.value)) {
                             if (candidate.value.$$definition) {
                                 var args = candidate.value.$$definition[0];
@@ -484,6 +505,8 @@
                     return a.name < b.name ? -1 : 1;
                 });
                 var box = $("<div class='box'></div>");
+                box.attr('data-token', token);
+                box.attr('data-type', type);
                 Utils.each(candidates, function (candidate) {
                     var item = $("<div class='item'><span class='title'><span class='prefix'></span><span class='suffix'></span></span><span class='type'></span></div>");
                     item.addClass(candidate.type);

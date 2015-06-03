@@ -377,7 +377,10 @@
                     }
                 };
                 if (candidates.length == 1) {
-                    complete(0, true);
+                    if ((new RegExp("\\b" + (token + candidates[0].name) + "\\s+$")).test(expression)) {
+                        return;
+                    }
+                    complete(0, false);
                     return;
                 }
                 candidates.sort(function (a, b) {

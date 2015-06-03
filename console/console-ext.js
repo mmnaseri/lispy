@@ -4,16 +4,22 @@
  */
 (function () {
     $(document).on('consoleReady', function (e, Console) {
+        var env = Lispy.env();
         Console.console.on('autoComplete', function (e, contextHolder) {
-            if (contextHolder.prefix == "" && contextHolder.type == "all") {
+            if (contextHolder.type == "all") {
                 var context = {};
-                if (/\(\s*libs\+\s+([^()]+\s+)*$/.test(contextHolder.expression)) {
-                    var libs = Lispy.env()['libs*']();
+                if (/\(\s*libs\+\s+([^()]+\s+)*([^()]+)?$/.test(contextHolder.expression)) {
+                    var expression = contextHolder.expression.substring(contextHolder.expression.lastIndexOf('libs+') + 5);
+                    expression = expression.replace(/^\s+|\s+$/g, "").split(/\s+/);
+                    var libs = env['libs*']();
                     Lispy.utils().each(libs, function (name) {
                         if (name[0] != '-') {
                             return;
                         }
                         name = name.substring(1);
+                        if (expression.indexOf(name) != -1) {
+                            return;
+                        }
                         context[name] = {
                             $$type: 'library'
                         }

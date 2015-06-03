@@ -81,6 +81,7 @@ body {
 
 #console div.input.first {
     border-left: 1px solid black;
+    margin-top: 5px;
 }
 
 #console div.input.first:before {
@@ -129,6 +130,10 @@ body {
     color: #ff5a5a;
 }
 
+#console div.warning {
+    color: #ffdc92;
+}
+
 #console div.output {
     color: #c4e9ff;
 }
@@ -137,8 +142,8 @@ body {
     color: #c4e9ff;
 }
 
-#console div.output:before, #console div.error:before {
-    content: '> ';
+#console div.output:before, #console div.error:before , #console div.warning:before {
+    /*content: '> ';*/
 }
 
 #console .placeholder {

@@ -12,10 +12,10 @@
             log: function (type, what) {
                 what = Lispy.utils().toString(what).split("\n");
                 $.each(what, function (index, value) {
+                    value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    value = value.replace(/ /g, '&nbsp;').replace(/\n/g, '<br/>\n');
                     //todo fix this
-                    //value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-                    //value = value.replace(/ /g, '&nbsp;').replace(/\n/g, '<br/>\n');
-                    value = value.replace(/([^\s;:/\\&]+:\/\/[^\s;]+)/, "<a href='$1" + "' target='_blank'>$1</a>");
+                    //value = value.replace(/([^\s;:/\\&]+:\/\/[^\s;]+)/, "<a href='$1" + "' target='_blank'>$1</a>");
                     var output = $("<div></div>");
                     output.addClass(type);
                     output.html(value);
@@ -23,10 +23,19 @@
                 });
             },
             print: function (what) {
-                Console.log("output", what);
+                Lispy.utils().each(arguments, function (what) {
+                    Console.log("output", what);
+                });
+            },
+            warn: function (what) {
+                Lispy.utils().each(arguments, function (what) {
+                    Console.log("warning", what);
+                });
             },
             error: function (what) {
-                Console.log("error", what);
+                Lispy.utils().each(arguments, function (what) {
+                    Console.log("output", what);
+                });
             },
             init: function () {
                 if (Console.console.find('.input').length == 0) {
@@ -699,11 +708,19 @@
                         array.push(arguments[i]);
                     }
                     return array;
+                },
+                'export': function () {
+                    var array = [];
+                    for (var i = 0; i < arguments.length; i++) {
+                        array.push(arguments[i]);
+                    }
+                    return array;
                 }
             },
             environment: {
                 print: Console.print,
                 error: Console.error,
+                warn: Console.warn,
                 help: function () {
                     this.print('This is a normal LISP console. You can execute functions');
                     this.print('using the (fn ...) syntax');
@@ -757,16 +774,15 @@
                     $.each(arguments, function (index, name) {
                         if (typeof env[name] == "undefined") {
                             env.error("Unknown object: " + name);
-                        }
-                        if ($.isFunction(env[name])) {
-                            if (env[name].$$definition) {
+                        } else if ($.isFunction(env[name])) {
+                            if (env[name].$$definition && env[name].$$definition.length > 1) {
                                 var definition = ['lambda'];
                                 for (var i = 0; i < env[name].$$definition.length; i++) {
                                     definition.push(env[name].$$definition[i]);
                                 }
                                 result[name] = definition;
                             } else {
-                                env.error("Cannot publish native function: " + name);
+                                env.warn("Cannot publish native function: " + name);
                             }
                         } else {
                             result[name] = env[name];
@@ -779,6 +795,50 @@
                         return;
                     }
                     return src.join("\n");
+                },
+                'export': function () {
+                    var result = {};
+                    var env = this;
+                    var src = '';
+                    $.each(arguments, function (index, name) {
+                        if (typeof env[name] == "undefined") {
+                            env.error("Unknown object: " + name);
+                        } else if ($.isFunction(env[name])) {
+                            if (env[name].$$definition && env[name].$$definition.length > 1) {
+                                var definition = ['lambda'];
+                                for (var i = 0; i < env[name].$$definition.length; i++) {
+                                    definition.push(env[name].$$definition[i]);
+                                }
+                                result[name] = definition;
+                            } else {
+                                env.warn("Cannot publish native function: " + name);
+                            }
+                        } else {
+                            result[name] = env[name];
+                        }
+                    });
+                    $.each(result, function (name, value) {
+                        src += '(define ' + name + ' ';
+                        (function convert(value) {
+                            if (Lispy.utils().isArray(value)) {
+                                src += '(';
+                                Lispy.utils().each(value, function (value) {
+                                    convert(value);
+                                    src += ' ';
+                                });
+                                src += ')';
+                            } else if (Lispy.utils().isString(value)) {
+                                src += value;
+                            } else {
+                                src += Lispy.utils().toString(value, true);
+                            }
+                        })(value);
+                        src += ')';
+                    });
+                    if (src.length == 0) {
+                        return;
+                    }
+                    return src;
                 }
             }
         };

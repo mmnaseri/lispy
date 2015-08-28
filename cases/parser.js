@@ -53,7 +53,7 @@ describe("the parser", function () {
     });
 
     it("should honor tokens enclosed in double quotes as a single token", function () {
-        expect(Lispy.parse('("a b" 1)').current()).toEqual(['a b', 1]);
+        expect(Lispy.parse('("a b" 1)').current()).toEqual([['str', 'a b'], 1]);
     });
 
     it("should lazily evaluate the next expression when needed", function () {

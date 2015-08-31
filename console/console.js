@@ -731,7 +731,11 @@
                         if (command.$$definition) {
                             var usage = "(" + command.$$name;
                             for (var i = 0; i < command.$$definition[0].length; i ++) {
-                                usage += " " + command.$$definition[0][i];
+                                var parameter = command.$$definition[0][i];
+                                if (parameter == '*') {
+                                    parameter = '...';
+                                }
+                                usage += " " + parameter;
                             }
                             usage += ")";
                             this.print("Usage: " + usage);

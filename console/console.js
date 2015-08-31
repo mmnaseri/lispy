@@ -721,7 +721,30 @@
                 print: Console.print,
                 error: Console.error,
                 warn: Console.warn,
-                help: function () {
+                help: function (command) {
+                    if (arguments.length) {
+                        if (typeof command == 'undefined' || !command.$$name) {
+                            this.print("No help is available for this item");
+                            return;
+                        }
+                        this.print("Variable: " + command.$$name);
+                        if (command.$$definition) {
+                            var usage = "(" + command.$$name;
+                            for (var i = 0; i < command.$$definition[0].length; i ++) {
+                                usage += " " + command.$$definition[0][i];
+                            }
+                            usage += ")";
+                            this.print("Usage: " + usage);
+                        }
+                        if (command.$$origin) {
+                            this.print("Defined in: " + command.$$origin);
+                        }
+                        if (command.$$description) {
+                            this.print("");
+                            this.print(command.$$description);
+                        }
+                        return;
+                    }
                     this.print('This is a normal LISP console. You can execute functions');
                     this.print('using the (fn ...) syntax');
                     this.print('You can explore the commands available to you by executing');
@@ -734,6 +757,9 @@
                     this.print('exactly like using the "str" function)');
                     this.print('');
                     this.print('You can also issue (clear) to clear the console');
+                    this.print('You can see a more detailed tutorial by issuing the `(tutorial)` command.');
+                    this.print('To know more about a specific command you can issue `(help command)` to');
+                    this.print('get to know more.');
                 },
                 ls: function () {
                     var env = this;
@@ -839,15 +865,47 @@
                         return;
                     }
                     return src;
+                },
+                'tutorial': function () {
+                    this.print("The Environment");
+                    this.print("===============");
+                    this.print("The basic way to manipulate the environment is by defining variables:");
+                    this.print("    (define x 1)");
+                    this.print("This will create a variable named `x` with its value set to `1`");
+                    this.print("You can also query the value of a variable using the `val` function:");
+                    this.print("    (val x)");
+                    this.print("Another basic example would be creating a function object:");
+                    this.print("    (lambda (a b) (+ a b))");
+                    this.print("Which creates a function that upon execution returns the summation of its two arguments");
+                    this.print("You can now give this lambda object a name so that you can call it:");
+                    this.print("    (define add (lambda (a b) (+ a b)))");
+                    this.print("Now calling `(add 1 2)` will return `3`");
+                    this.print("");
+                    this.print("Libraries");
+                    this.print("=========");
+                    this.print("Libraries are pre-created sets of commands that can help you with writing your own dialects.");
+                    this.print("You can see a list of available libraries using:");
+                    this.print("    (libs*)");
+                    this.print("To load a library, you can simply type:");
+                    this.print("    (libs+ ...)");
+                    this.print("where `...` is replaced by the name of the library you want to load.");
                 }
             }
         };
         lib.environment.clear.$$definition = [[]];
         lib.environment.error.$$definition = [['msg']];
-        lib.environment.help.$$definition = [[]];
+        lib.environment.help.$$definition = [['command']];
         lib.environment.ls.$$definition = [[]];
         lib.environment.print.$$definition = [['msg']];
         lib.environment.publish.$$definition = [['var1', 'var2', 'var3', '*']];
-        Lispy.load(lib);
+        lib.environment.tutorial.$$definition = [[]];
+        lib.environment.clear.$$description = "Clears the console";
+        lib.environment.error.$$description = "Prints an error message to the output";
+        lib.environment.help.$$description = "Brings up general console directions. Can also be used to get more specific insight about a command";
+        lib.environment.ls.$$description = "Lists everything available in the environment";
+        lib.environment.print.$$description = "Prints a given message to the standard output";
+        lib.environment.publish.$$description = "Publishes a JavaScript snippet that would define the given command in Lispy";
+        lib.environment.tutorial.$$description = "A short tutorial about Lispy and Lisp in general";
+        Lispy.load('console', lib);
     });
 })(jQuery);

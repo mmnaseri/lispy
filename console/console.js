@@ -34,7 +34,7 @@
             },
             error: function (what) {
                 Lispy.utils().each(arguments, function (what) {
-                    Console.log("output", what);
+                    Console.log("error", what);
                 });
             },
             init: function () {
@@ -911,5 +911,8 @@
         lib.environment.publish.$$description = "Publishes a JavaScript snippet that would define the given command in Lispy";
         lib.environment.tutorial.$$description = "A short tutorial about Lispy and Lisp in general";
         Lispy.load('console', lib);
+        window.onerror = function (error, file, line, column, message) {
+            Console.error(message);
+        };
     });
 })(jQuery);

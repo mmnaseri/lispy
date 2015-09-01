@@ -142,6 +142,15 @@ body {
     color: #c4e9ff;
 }
 
+#console div.output code {
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-size: 14px;
+    background: #89887f;
+    color: #eaeaea;
+    border-radius: 2px;
+    padding: 2px;
+}
+
 #console div.output:before, #console div.error:before , #console div.warning:before {
     /*content: '> ';*/
 }

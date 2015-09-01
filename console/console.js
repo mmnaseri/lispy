@@ -15,7 +15,8 @@
                     value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                     value = value.replace(/ /g, '&nbsp;').replace(/\n/g, '<br/>\n');
                     //todo fix this
-                    //value = value.replace(/([^\s;:/\\&]+:\/\/[^\s;]+)/, "<a href='$1" + "' target='_blank'>$1</a>");
+                    //value = value.replace(/((?:http|https):\/\/(?!&nbsp;)+)/g, "<a href='$1" + "' target='_blank'>$1</a>");
+                    value = value.replace(/`(.*?)`/g, '<code>$1</code>');
                     var output = $("<div></div>");
                     output.addClass(type);
                     output.html(value);

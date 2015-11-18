@@ -48,8 +48,8 @@
                     parent.appendChild(clone);
                     parent.replaceChild(clone, thief);
                     thief = clone;
-                    clone.addEventListener('keydown', function (e) {
-                        e.preventDefault();
+                    clone.addEventListener('keyup', function (e) {
+                        clone.value = "";
                     });
                     setTimeout(function () {
                         thief.value = thief.value || "";

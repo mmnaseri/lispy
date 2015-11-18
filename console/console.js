@@ -40,12 +40,7 @@
             },
             init: function () {
                 var thief = $("#focus-thief")[0];
-                var focusAcquired = false;
                 var eventHandler = function (e) {
-                    if (focusAcquired) {
-                        return;
-                    }
-                    focusAcquired = true;
                     e.stopPropagation();
                     e.preventDefault();
                     var clone = thief.cloneNode(true);

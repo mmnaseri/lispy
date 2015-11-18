@@ -48,6 +48,9 @@
                     parent.appendChild(clone);
                     parent.replaceChild(clone, thief);
                     thief = clone;
+                    clone.addEventListener('keydown', function (e) {
+                        e.preventDefault();
+                    });
                     setTimeout(function () {
                         thief.value = thief.value || "";
                         thief.focus();

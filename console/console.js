@@ -39,7 +39,22 @@
                 });
             },
             init: function () {
-                $("#focus-thief").focus();
+                var thief = $("#focus-thief")[0];
+                var eventHandler = function (e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    var clone = thief.cloneNode(true);
+                    var parent = thief.parentElement;
+                    parent.appendChild(clone);
+                    parent.replaceChild(clone, thief);
+                    thief = clone;
+                    setTimeout(function () {
+                        thief.value = thief.value || "";
+                        thief.focus();
+                    }, 0);
+                };
+                document.body.addEventListener('touchstart', eventHandler);
+                document.body.addEventListener('mousedown', eventHandler);
             },
             reset: function () {
                 if (Console.console.find('.input').length == 0) {

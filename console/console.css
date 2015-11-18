@@ -208,4 +208,14 @@ body {
     width: 0;
     height: 0;
     opacity: 0;
+    outline: none;
+}
+
+#keyboard-toggle {
+    position: fixed;
+    right: 10px;
+    top: 5px;
+    border: 1px solid #efefef;
+    border-radius: 4px;
+    background: #fefefe;
 }

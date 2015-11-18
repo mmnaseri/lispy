@@ -59,8 +59,7 @@
                         thief.id = "focus-thief";
                     }, 0);
                 };
-                document.body.addEventListener('touchstart', eventHandler);
-                document.body.addEventListener('mousedown', eventHandler);
+                $('#keyboard-toggle').on('click', eventHandler).on('touchstart', eventHandler);
             },
             reset: function () {
                 if (Console.console.find('.input').length == 0) {

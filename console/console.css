@@ -203,3 +203,9 @@ body {
     background: #ffffc4;
     border-radius: 3px;
 }
+
+#focus-thief {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}

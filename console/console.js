@@ -39,6 +39,9 @@
                 });
             },
             init: function () {
+                $("#focus-thief").focus();
+            },
+            reset: function () {
                 if (Console.console.find('.input').length == 0) {
                     Console.console.append("<div class='input active first'></div>");
                 }
@@ -215,7 +218,7 @@
                         Console.console.find('.input.active').removeClass('active').addClass('recent');
                         Console.console.append("<div class='input active first'><span class='placeholder'>&nbsp;</span></div>");
                     }
-                    Console.init();
+                    Console.reset();
                     if (open > 0 || quotes > 0) {
                         if (Console.caret.parent().prev().hasClass('input') && Console.caret.parent().prev().hasClass('active')) {
                             (function () {
@@ -350,7 +353,7 @@
                     //this is the last line and we have to insert a caret
                     Console.caret.removeClass('active');
                     Console.caret = null;
-                    Console.init();
+                    Console.reset();
                 }
                 Console.move();
             },
@@ -365,7 +368,7 @@
                 Console.console.find('.input.active').last().find('.character').remove();
                 Console.console.find('.input.active').last().find('.caret').remove();
                 Console.caret = null;
-                Console.init();
+                Console.reset();
                 Console.sequence(Console.history[pointer], false);
                 Console.pointer = pointer;
             },
@@ -380,7 +383,7 @@
                 Console.console.find('.input.active').last().find('.character').remove();
                 Console.console.find('.input.active').last().find('.caret').remove();
                 Console.caret = null;
-                Console.init();
+                Console.reset();
                 if (pointer < Console.history.length) {
                     Console.sequence(Console.history[pointer], false);
                 }
@@ -593,7 +596,7 @@
             }
         };
         setTimeout(function () {
-            Console.init();
+            Console.reset();
             var $paste = $("#paste");
             $paste.find('.cancel').on('click', function () {
                 $paste.hide();
@@ -915,5 +918,6 @@
         window.onerror = function (error, file, line, column, message) {
             Console.error(message);
         };
+        Console.init();
     });
 })(jQuery);

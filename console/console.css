@@ -209,6 +209,9 @@ body {
     height: 0;
     opacity: 0;
     outline: none;
+    position: absolute;
+    left: -100px;
+    top: -100px;
 }
 
 #keyboard-toggle {
